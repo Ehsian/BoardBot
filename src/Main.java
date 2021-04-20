@@ -22,7 +22,7 @@ public class Main extends ListenerAdapter {
 
     public static void main(String[] args) throws LoginException,IOException {
         //-------------------------------------------------- Initialize Bot
-        BufferedReader br = new BufferedReader(new FileReader("token.txt"));
+        BufferedReader br = new BufferedReader(new FileReader("ignore/token.txt"));
         jda = JDABuilder.createDefault(br.readLine()).build();
         br.close();
         if(!allUsers.contains(jda.getSelfUser())){
