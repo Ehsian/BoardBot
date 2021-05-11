@@ -54,8 +54,6 @@ public class RockPaperScissors extends ListenerAdapter {
     };
     public void main(){
         player1 = event.getAuthor();
-        player2 = Main.jda.getSelfUser();
-        player2choice = (int)(Math.random()*3);
         if(Main.inGame.contains(player1)){
             event.getChannel().sendMessage("Challenge failed. (Finish your current game first!)").queue();
             player1 = null;
@@ -63,39 +61,25 @@ public class RockPaperScissors extends ListenerAdapter {
         } else{
             Main.inGame.add(player1);
         }
-        if(args.length>1){
-            try{
-                player2 = event.getMessage().getMentionedUsers().get(0);
-                if(player2.isBot()||player2.equals(player1)){
-                    event.getChannel().sendMessage("Please challenge a valid user.").queue();
-                    Main.inGame.remove(player1);
-                    player1 = null;
-                } else{
-                    multiplayer = true;
-                    event.getChannel().sendMessage(String.format("<@%s>, you have 10 seconds to respond to this challenge.",player2.getId())).queue(message -> {
-                        message.addReaction("✅").queue();
-                        message.addReaction("❎").queue();
-                        reactable = true;
-                    });
-                    Timer timer = new Timer();
-                    timer.schedule(terminate1,10000);
-                }
-            }
-            catch(Exception e){
+        try{
+            player2 = event.getMessage().getMentionedUsers().get(0);
+            if(player2.isBot()||player2.equals(player1)){
                 event.getChannel().sendMessage("Please challenge a valid user.").queue();
+                Main.inGame.remove(player1);
+                player1 = null;
+            } else{
+                multiplayer = true;
+                event.getChannel().sendMessage(String.format("<@%s>, you have 10 seconds to respond to this challenge.",player2.getId())).queue(message -> {
+                    message.addReaction("✅").queue();
+                    message.addReaction("❎").queue();
+                    reactable = true;
+                });
+                Timer timer = new Timer();
+                timer.schedule(terminate1,10000);
             }
         }
-        else{
-            singleplayer = true;
-            player1.openPrivateChannel().queue((privateChannel -> {
-                privateChannel.sendMessage("React your selection!").queue(message -> {
-                    message.addReaction("\uD83E\uDEA8").queue();
-                    message.addReaction("📄").queue();
-                    message.addReaction("✂").queue();
-                });
-            }));
-            Timer timer = new Timer();
-            timer.schedule(terminate1,15000);
+        catch(Exception e){
+            event.getChannel().sendMessage("Please challenge a valid user.").queue();
         }
     }
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) throws NullPointerException,IllegalStateException{
@@ -107,7 +91,7 @@ public class RockPaperScissors extends ListenerAdapter {
             } else{
                 Main.inGame.add(player2);
             }
-            player2choice=-1;
+            //player2choice=-1;
             reactable = false;
             singleplayer = false;
             event.getChannel().sendMessage("Commencing game... (Check your DMs)").queue();
@@ -131,6 +115,7 @@ public class RockPaperScissors extends ListenerAdapter {
         else if(event.getReactionEmote().getName().equals("❎")&&event.getMember().getUser().equals(player2)&&reactable){
             reactable = false;
             event.getChannel().sendMessage("Challenge declined.").queue();
+            Main.inGame.remove(player1);
         }
     }
     public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event)throws NullPointerException{

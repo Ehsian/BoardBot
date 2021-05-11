@@ -14,12 +14,6 @@ public class Battleship {
     public void main(){
         player1 = event.getAuthor();
         player2 = Main.jda.getSelfUser();
-        if(args.length>1){
-            try{
-                player2 = event.getMessage().getMentionedUsers().get(0);
-            } catch(Exception e){
 
-            }
-        }
     }
 }

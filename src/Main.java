@@ -57,7 +57,14 @@ public class Main extends ListenerAdapter {
             switch (args[0].substring(Main.prefix.length()).toLowerCase()) {
                 case "help", "info", "commands" -> Help.main(args, event);
                 case "ping", "latency" -> Ping.main(event);
-                case "rps", "rockpaperscissors" -> jda.addEventListener(new RockPaperScissors(args, event));
+                case "rps", "rockpaperscissors" -> {
+                    if(args.length>1){
+                        jda.addEventListener(new RockPaperScissors(args, event));
+                    }
+                    else{
+                        jda.addEventListener(new RPSsingle(args, event));
+                    }
+                }
                 case "battleship" -> jda.addEventListener(new Battleship(args,event));
                 case "test" -> {
                     try {

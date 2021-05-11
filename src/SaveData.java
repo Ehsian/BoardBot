@@ -40,7 +40,7 @@ public class SaveData {
         dataObject.put("totalrpswins",totalrpswins);
         dataObject.put("totalrpslosses",totalrpslosses);
         dataObject.put("rpswins",rpswins);
-        File saveFile = new File("Saves/"+dtf.format(now)+".json");
+        File saveFile = new File("ignore/Saves/"+dtf.format(now)+".json");
         File recentSave = new File("BoardBotData.json");
         FileOutputStream fileOutputStream = new FileOutputStream(saveFile);
         fileOutputStream.write(dataObject.toJson());

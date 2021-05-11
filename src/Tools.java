@@ -5,6 +5,13 @@ public class Tools {
     public static Player getPlayer(User user){
         return Main.allPlayers.get(Main.allUsers.indexOf(user));
     }
+    public static boolean isValidChallenge(User player1, GuildMessageReceivedEvent event){
+        if(Main.inGame.contains(player1)){
+            event.getChannel().sendMessage("Challenge failed. (Finish your current game first!)").queue();
+            return false;
+        }
+        return true;
+    }
     public static boolean isValidChallenge(User player1, User player2, GuildMessageReceivedEvent event){
         if(Main.inGame.contains(player1)){
             event.getChannel().sendMessage("Challenge failed. (Finish your current game first!)").queue();
