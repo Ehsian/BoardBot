@@ -27,4 +27,25 @@ public class Tools {
         }
         return true;
     }
+    public static int toInteger(char ch){
+        return switch (ch) {
+            case 'a' -> 1;
+            case 'b' -> 2;
+            case 'c' -> 3;
+            case 'd' -> 4;
+            case 'e' -> 5;
+            case 'f' -> 6;
+            case 'g' -> 7;
+            case 'h' -> 8;
+            case 'i' -> 9;
+            case 'j' -> 10;
+            default -> -1;
+        };
+    }
+    public static User firstTurn(User p1, User p2){
+        if((int)(Math.random()*2)==0){
+            return p1;
+        }
+        return p2;
+    }
 }

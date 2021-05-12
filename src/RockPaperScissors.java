@@ -29,6 +29,7 @@ public class RockPaperScissors extends ListenerAdapter {
                 Main.inGame.remove(player1);
                 reactable = false;
                 event.getChannel().sendMessage("Operation terminated. (Timeout)").queue();
+                player1 = null;
             }
             else if(singleplayer){
                 Main.inGame.remove(player1);
@@ -91,8 +92,7 @@ public class RockPaperScissors extends ListenerAdapter {
             } else{
                 Main.inGame.add(player2);
             }
-            //player2choice=-1;
-            reactable = false;
+                reactable = false;
             singleplayer = false;
             event.getChannel().sendMessage("Commencing game... (Check your DMs)").queue();
             player1.openPrivateChannel().queue((privateChannel -> {

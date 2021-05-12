@@ -65,7 +65,7 @@ public class Main extends ListenerAdapter {
                         jda.addEventListener(new RPSsingle(args, event));
                     }
                 }
-                case "battleship" -> jda.addEventListener(new Battleship(args,event));
+                //case "battleship" -> jda.addEventListener(new Battleship(args,event));
                 case "test" -> {
                     try {
                         SaveData.saveData();
