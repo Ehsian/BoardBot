@@ -1,3 +1,5 @@
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
@@ -18,7 +20,7 @@ public class Battleship extends ListenerAdapter {
     User turn;
     boolean gameState; //false == setup, true == battle
 
-    int[][]map1 = new int[10][10];
+    int[][]map1 = new int[10][10]; //0 is water, 1 is ship, 2 is miss, 3 is hit
     int[][]map2 = new int[10][10];
 
     TimerTask terminate1 = new TimerTask(){
@@ -80,11 +82,7 @@ public class Battleship extends ListenerAdapter {
             event.getChannel().sendMessage("Commencing game... (Check your DMs)").queue();
             /*
             player1.openPrivateChannel().queue((privateChannel -> {
-                privateChannel.sendMessage("React your selection!").queue(message -> {
-                    message.addReaction("\uD83E\uDEA8").queue();
-                    message.addReaction("📄").queue();
-                    message.addReaction("✂").queue();
-                });
+                privateChannel.sendMessage("React your selection!").queue();
             }));
             player2.openPrivateChannel().queue((privateChannel -> {
                 privateChannel.sendMessage("React your selection!").queue(message -> {
@@ -123,5 +121,32 @@ public class Battleship extends ListenerAdapter {
                 return;
             }
         }
+    }
+    public void printMap(int[][]board, User player, boolean seeShipLocations, PrivateChannel channel){
+        String mapAsString = ":blue_square::one::two::three::four::five::six::seven::eight::nine::keycap_ten:";
+        for(int i=0;i<10;i++){
+            mapAsString+="\n:regional_indicator_"+(char)(i+97)+":";
+            for(int j=0;j<10;j++){
+                if(board[i][j]==0){
+                    mapAsString+=":blue_square:";
+                }
+                else if(board[i][j]==1&&seeShipLocations){
+                    mapAsString+=":black_large_square:";
+                }
+                else if(board[i][j]==2){
+                    mapAsString+=":white_large_square:";
+                }
+                else if(board[i][j]==3&&seeShipLocations){
+                    mapAsString+=":x:";
+                }
+                else if(board[i][j]==3&&!seeShipLocations){
+                    mapAsString+=":red_square:";
+                }
+            }
+        }
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle(player.getName()+"'s Board:");
+        embed.setDescription(mapAsString);
+        channel.sendMessage(embed.build()).queue();
     }
 }
