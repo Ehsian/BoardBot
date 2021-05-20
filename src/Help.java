@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import java.io.*;
 import java.util.*;
 
-public class Help {
+public class Help extends ListenerAdapter{
     static String help1 = "`help` - You're already here!\n" +
             "`ping` - Finds latency of the bot.\n" +
             "`rps <user>` - Challenges a user to a duel of rock paper scissors. Omit <user> to challenge the bot.";

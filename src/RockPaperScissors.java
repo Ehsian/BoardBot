@@ -92,7 +92,7 @@ public class RockPaperScissors extends ListenerAdapter {
             } else{
                 Main.inGame.add(player2);
             }
-                reactable = false;
+            reactable = false;
             singleplayer = false;
             event.getChannel().sendMessage("Commencing game... (Check your DMs)").queue();
             player1.openPrivateChannel().queue((privateChannel -> {

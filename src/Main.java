@@ -65,7 +65,7 @@ public class Main extends ListenerAdapter {
                         jda.addEventListener(new RPSsingle(args, event));
                     }
                 }
-                //case "battleship" -> jda.addEventListener(new Battleship(args,event));
+                case "battleship" -> jda.addEventListener(new Battleship(args,event));
                 case "test" -> {
                     try {
                         SaveData.saveData();
@@ -81,6 +81,7 @@ public class Main extends ListenerAdapter {
                     }
                 }
                 case "test3" -> System.out.println(Tools.getPlayer(event.getAuthor()).totalgamesplayed);
+                case "mumen","rider","mumenrider","ki" -> jda.addEventListener(new MumenRider(event));
             }
         }
     }
