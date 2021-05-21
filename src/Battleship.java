@@ -10,6 +10,20 @@ import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/*
+TODO:
+    - Timeout in game (prevent hostage holding)
+    - ff / resign (when need to leave or you know you will lose already)
+    - "You sunk my battleship!"
+    - List which ships have not been placed yet (improve setup)
+    - Ranking/Rating
+        - Leaderboard
+    - Aborting game before game start (during setup)
+    - Rules?
+ */
+
+
+
 public class Battleship extends ListenerAdapter {
 
     boolean reactable;
@@ -257,12 +271,12 @@ public class Battleship extends ListenerAdapter {
                             }
                         }
                         if(allSunk){
+                            printMap(player1,true,player2.openPrivateChannel().complete());
+                            printMap(player2,true,event.getChannel());
                             event.getChannel().sendMessage("You win!").queue();
                             player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You lost!").queue());
                             Main.inGame.remove(player1);
                             Main.inGame.remove(player2);
-                            player1 = null;
-                            player2 = null;
                             Tools.getPlayer(player1).winBatShip(player2);
                             Tools.getPlayer(player2).loseBatShip();
                             EmbedBuilder embed = new EmbedBuilder();
@@ -270,6 +284,10 @@ public class Battleship extends ListenerAdapter {
                             embed.setColor(0x00e5ff);
                             embed.setDescription("**"+player1.getName()+" wins against "+player2.getName()+"**");
                             embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                            player1 = null;
+                            player2 = null;
+                            this.event.getChannel().sendMessage(embed.build()).queue();
+                            embed.clear();
                             return;
                         }
                     }
@@ -300,12 +318,12 @@ public class Battleship extends ListenerAdapter {
                             }
                         }
                         if(allSunk){
+                            printMap(player2,true,player1.openPrivateChannel().complete());
+                            printMap(player1,true,event.getChannel());
                             event.getChannel().sendMessage("You win!").queue();
                             player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You lost!").queue());
                             Main.inGame.remove(player1);
                             Main.inGame.remove(player2);
-                            player1 = null;
-                            player2 = null;
                             Tools.getPlayer(player2).winBatShip(player1);
                             Tools.getPlayer(player1).loseBatShip();
                             EmbedBuilder embed = new EmbedBuilder();
@@ -313,6 +331,10 @@ public class Battleship extends ListenerAdapter {
                             embed.setColor(0x00e5ff);
                             embed.setDescription("**"+player1.getName()+" loses to "+player2.getName()+"**");
                             embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                            player1 = null;
+                            player2 = null;
+                            this.event.getChannel().sendMessage(embed.build()).queue();
+                            embed.clear();
                             return;
                         }
                     }
