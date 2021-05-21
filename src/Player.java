@@ -11,13 +11,22 @@ public class Player implements Serializable {
     public int rpswinstreak;
     public int totalrpswins;
     public int totalrpslosses;
-
-
     public ArrayList<Integer> rpswins = new ArrayList<>(); //rps wins against user. rpswins index = allUsers Index
+
+    //-------------------------------------------Battleship
+    public int batshipgamesplayed;
+    public int batshipwinstreak;
+    public int totalbatshipwins;
+    public int totalbatshiplosses;
+    public ArrayList<Integer> batshipwins = new ArrayList<>();
+
+    //-------------------------------------------
     public Player(String userID){
         this.userID = userID;
         rpsgamesplayed = 0;
         rpswinstreak = 0;
+        batshipgamesplayed = 0;
+        batshipwinstreak = 0;
     }
     public Player(String userID,int totalgamesplayed,int rpsgamesplayed,int rpswinstreak,int totalrpswins,int totalrpslosses,ArrayList<Integer> rpswins){
         this.userID = userID;
@@ -28,6 +37,8 @@ public class Player implements Serializable {
         this.totalrpslosses = totalrpslosses;
         this.rpswins = rpswins;
     }
+
+    //-------------------------------------------RockPaperScissors
     public void winRps(User opponent){
         totalrpswins++;
         rpswinstreak++;
@@ -56,6 +67,38 @@ public class Player implements Serializable {
                 rpswins.add(0);
             }
             return rpswins.get(Main.allUsers.indexOf(opponent));
+        }
+    }
+
+    //-------------------------------------------Battleship
+    public void winBatShip(User opponent){
+        totalbatshipwins++;
+        batshipwinstreak++;
+        batshipgamesplayed++;
+        try{
+            batshipwins.set(Main.allUsers.indexOf(opponent),batshipwins.get(Main.allUsers.indexOf(opponent))+1);
+        }catch(Exception e){
+            while(batshipwins.size()-1<Main.allUsers.indexOf(opponent)){
+                batshipwins.add(0);
+            }
+            batshipwins.set(Main.allUsers.indexOf(opponent),batshipwins.get(Main.allUsers.indexOf(opponent))+1);
+        }
+        totalgamesplayed++;
+    }
+    public void loseBatShip(){
+        totalbatshiplosses++;
+        batshipwinstreak=0;
+        batshipgamesplayed++;
+        totalgamesplayed++;
+    }
+    public int getBatShip1v1Stats(User opponent){
+        try{
+            return batshipwins.get(Main.allUsers.indexOf(opponent));
+        }catch(Exception e){
+            while(batshipwins.size()-1<Main.allUsers.indexOf(opponent)){
+                batshipwins.add(0);
+            }
+            return batshipwins.get(Main.allUsers.indexOf(opponent));
         }
     }
 }

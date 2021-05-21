@@ -84,19 +84,16 @@ public class Battleship extends ListenerAdapter {
             reactable = false;
             turn = Tools.firstTurn(player1,player2);
             event.getChannel().sendMessage("Commencing game... (Check your DMs)").queue();
-            //turn.openPrivateChannel().queue((privateChannel -> privateChannel.sendMessage("Your turn!").queue()));
-            /*
-            player1.openPrivateChannel().queue((privateChannel -> {
-                privateChannel.sendMessage("React your selection!").queue();
-            }));
-            player2.openPrivateChannel().queue((privateChannel -> {
-                privateChannel.sendMessage("React your selection!").queue(message -> {
-                    message.addReaction("\uD83E\uDEA8").queue();
-                    message.addReaction("📄").queue();
-                    message.addReaction("✂").queue();
-                });
-            }));
-            */
+            player1.openPrivateChannel().queue(privateChannel -> {
+                printMap(player1,true,privateChannel);
+                privateChannel.sendMessage("Deploy your ships!").queue();
+                privateChannel.sendMessage("Format example: `f3-f5` or `d3-g3`").queue();
+            });
+            player2.openPrivateChannel().queue(privateChannel -> {
+                printMap(player2,true,privateChannel);
+                privateChannel.sendMessage("Deploy your ships!").queue();
+                privateChannel.sendMessage("Format example: `f3-f5` or `d3-g3`").queue();
+            });
         }
         else if(event.getReactionEmote().getName().equals("❎")&&event.getMember().getUser().equals(player2)&&reactable){
             reactable = false;
@@ -215,7 +212,6 @@ public class Battleship extends ListenerAdapter {
                 }
             }
             printMap(event.getAuthor(),true,event.getChannel());
-            //to be implemented (set up ships)
             if(!((Arrays.toString(ships1)+Arrays.toString(ships2)).contains("1")||(Arrays.toString(ships1)+Arrays.toString(ships2)).contains("2"))){
                 gameActive = true;
                 turn.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Your turn!").queue());
@@ -262,6 +258,19 @@ public class Battleship extends ListenerAdapter {
                         }
                         if(allSunk){
                             event.getChannel().sendMessage("You win!").queue();
+                            player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You lost!").queue());
+                            Main.inGame.remove(player1);
+                            Main.inGame.remove(player2);
+                            player1 = null;
+                            player2 = null;
+                            Tools.getPlayer(player1).winBatShip(player2);
+                            Tools.getPlayer(player2).loseBatShip();
+                            EmbedBuilder embed = new EmbedBuilder();
+                            embed.setTitle("Results");
+                            embed.setColor(0x00e5ff);
+                            embed.setDescription("**"+player1.getName()+" wins against "+player2.getName()+"**");
+                            embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                            return;
                         }
                     }
                     case 2,3 -> {
@@ -292,6 +301,19 @@ public class Battleship extends ListenerAdapter {
                         }
                         if(allSunk){
                             event.getChannel().sendMessage("You win!").queue();
+                            player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You lost!").queue());
+                            Main.inGame.remove(player1);
+                            Main.inGame.remove(player2);
+                            player1 = null;
+                            player2 = null;
+                            Tools.getPlayer(player2).winBatShip(player1);
+                            Tools.getPlayer(player1).loseBatShip();
+                            EmbedBuilder embed = new EmbedBuilder();
+                            embed.setTitle("Results");
+                            embed.setColor(0x00e5ff);
+                            embed.setDescription("**"+player1.getName()+" loses to "+player2.getName()+"**");
+                            embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                            return;
                         }
                     }
                     case 2,3 -> {
