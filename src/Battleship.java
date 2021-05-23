@@ -51,6 +51,29 @@ public class Battleship extends ListenerAdapter {
         }
     };
 
+    TimerTask p1timeout = new TimerTask() {
+        @Override
+        public void run() {
+            if(gameActive){
+                player1.openPrivateChannel().queue(privateChannel -> {
+                    privateChannel.sendMessage("You spent too long before your next move. (Timeout)").queue();
+                    privateChannel.sendMessage("You have been given a loss for your inactivity.").queue();
+                });
+            }
+        }
+    };
+    TimerTask p2timeout = new TimerTask() {
+        @Override
+        public void run() {
+            if(gameActive){
+                player2.openPrivateChannel().queue(privateChannel -> {
+                    privateChannel.sendMessage("You spent too long before your next move. (Timeout)").queue();
+                    privateChannel.sendMessage("You have been given a loss for your inactivity.").queue();
+                });
+            }
+        }
+    };
+
     public Battleship(String[]args, GuildMessageReceivedEvent event){
         this.event = event;
         this.args = args;
