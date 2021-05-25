@@ -40,6 +40,9 @@ public class Battleship extends ListenerAdapter {
     int[]ships1 = {1,2,1,1};
     int[]ships2 = {1,2,1,1};
 
+    Timer p1timer = new Timer();
+    Timer p2timer = new Timer();
+
     TimerTask terminate1 = new TimerTask(){
         @Override
         public void run(){
@@ -59,6 +62,20 @@ public class Battleship extends ListenerAdapter {
                     privateChannel.sendMessage("You spent too long before your next move. (Timeout)").queue();
                     privateChannel.sendMessage("You have been given a loss for your inactivity.").queue();
                 });
+                Main.inGame.remove(player1);
+                Main.inGame.remove(player2);
+                Tools.getPlayer(player2).winBatShip(player1);
+                Tools.getPlayer(player1).loseBatShip();
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("Results");
+                embed.setColor(0x00e5ff);
+                embed.setDescription("**"+player1.getName()+" loses to "+player2.getName()+"**");
+                embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                player1 = null;
+                player2 = null;
+                event.getChannel().sendMessage(embed.build()).queue();
+                embed.clear();
+                player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You win! (Your opponent has timed out.)").queue());
             }
         }
     };
@@ -70,6 +87,34 @@ public class Battleship extends ListenerAdapter {
                     privateChannel.sendMessage("You spent too long before your next move. (Timeout)").queue();
                     privateChannel.sendMessage("You have been given a loss for your inactivity.").queue();
                 });
+                Main.inGame.remove(player1);
+                Main.inGame.remove(player2);
+                Tools.getPlayer(player1).winBatShip(player2);
+                Tools.getPlayer(player2).loseBatShip();
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("Results");
+                embed.setColor(0x00e5ff);
+                embed.setDescription("**"+player1.getName()+" wins against "+player2.getName()+"**");
+                embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                player1 = null;
+                player2 = null;
+                event.getChannel().sendMessage(embed.build()).queue();
+                embed.clear();
+                player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You win! (Your opponent has timed out.)").queue());
+            }
+        }
+    };
+    TimerTask abort = new TimerTask(){
+        @Override
+        public void run(){
+            if(!gameActive){
+                player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Game aborted.").queue());
+                player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Game aborted.").queue());
+                Main.inGame.remove(player1);
+                Main.inGame.remove(player2);
+                player1 = null;
+                player2 = null;
+                event.getChannel().sendMessage("Game aborted.").queue();
             }
         }
     };
@@ -144,6 +189,19 @@ public class Battleship extends ListenerAdapter {
         }
         String message = event.getMessage().getContentRaw().toLowerCase();
         if(!gameActive){
+            Timer timer = new Timer();
+            timer.schedule(abort,500000);
+            if(message.equals("/ff")){
+                player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Game aborted.").queue());
+                player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Game aborted.").queue());
+                Main.inGame.remove(player1);
+                Main.inGame.remove(player2);
+                player1 = null;
+                player2 = null;
+                this.event.getChannel().sendMessage("Game aborted.").queue();
+                return;
+            }
+
             int row1,row2,col1,col2;
             if(!message.contains("-")){
                 event.getChannel().sendMessage("Please send the coordinates separated by dash.").queue();
@@ -252,9 +310,55 @@ public class Battleship extends ListenerAdapter {
             if(!((Arrays.toString(ships1)+Arrays.toString(ships2)).contains("1")||(Arrays.toString(ships1)+Arrays.toString(ships2)).contains("2"))){
                 gameActive = true;
                 turn.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Your turn!").queue());
+                if(turn.equals(player1)){
+                    p1timer.schedule(p1timeout,200000);
+                }
+                else if(turn.equals(player2)){
+                    p2timer.schedule(p2timeout,200000);
+                }
             }
         }
         else { //gameActive = true
+            if(message.equals("/ff")){
+                if(event.getAuthor().equals(player1)){
+                    printMap(player1,true,player2.openPrivateChannel().complete());
+                    printMap(player2,true,event.getChannel());
+                    event.getChannel().sendMessage("You lost! (Resign)").queue();
+                    player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You won! (Opponent Resigned)").queue());
+                    Main.inGame.remove(player1);
+                    Main.inGame.remove(player2);
+                    Tools.getPlayer(player2).winBatShip(player1);
+                    Tools.getPlayer(player1).loseBatShip();
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setTitle("Results");
+                    embed.setColor(0x00e5ff);
+                    embed.setDescription("**"+player1.getName()+" loses to "+player2.getName()+"**");
+                    embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                    player1 = null;
+                    player2 = null;
+                    this.event.getChannel().sendMessage(embed.build()).queue();
+                    embed.clear();
+                }else{ //player2
+                    printMap(player2,true,player1.openPrivateChannel().complete());
+                    printMap(player1,true,event.getChannel());
+                    event.getChannel().sendMessage("You lost!").queue();
+                    player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You won! (Opponent Resigned)").queue());
+                    Main.inGame.remove(player1);
+                    Main.inGame.remove(player2);
+                    Tools.getPlayer(player1).winBatShip(player2);
+                    Tools.getPlayer(player2).loseBatShip();
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setTitle("Results");
+                    embed.setColor(0x00e5ff);
+                    embed.setDescription("**"+player1.getName()+" wins against "+player2.getName()+"**");
+                    embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                    player1 = null;
+                    player2 = null;
+                    this.event.getChannel().sendMessage(embed.build()).queue();
+                    embed.clear();
+                }
+                return;
+            }
             if(!event.getAuthor().equals(turn)){
                 return;
             }
@@ -322,7 +426,9 @@ public class Battleship extends ListenerAdapter {
                 player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Your opponent shot at `"+message+"`.").queue());
                 printMap(player2,false,event.getChannel());
                 printMap(player2,true,player2.openPrivateChannel().complete());
+                p1timer.cancel();
                 turn = player2;
+                p2timer.schedule(p2timeout,200000);
             }
             else if(turn.equals(player2)){
                 switch(map1[row-1][column-1]){
@@ -369,7 +475,9 @@ public class Battleship extends ListenerAdapter {
                 player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Your opponent shot at `"+message+"`.").queue());
                 printMap(player1,false,event.getChannel());
                 printMap(player1,true,player1.openPrivateChannel().complete());
+                p2timer.cancel();
                 turn = player1;
+                p1timer.schedule(p1timeout,200000);
             }
             turn.openPrivateChannel().queue((privateChannel -> privateChannel.sendMessage("Your turn!").queue()));
         }
