@@ -12,13 +12,13 @@ import java.util.TimerTask;
 
 /*
 TODO:
-    - Timeout in game (prevent hostage holding)
-    - ff / resign (when need to leave or you know you will lose already)
+    - Timeout in game (prevent hostage holding) DONE
+    - ff / resign (when need to leave or you know you will lose already) DONE
     - "You sunk my battleship!"
     - List which ships have not been placed yet (improve setup)
     - Ranking/Rating
         - Leaderboard
-    - Aborting game before game start (during setup)
+    - Aborting game before game start (during setup) DONE
     - Rules?
  */
 
@@ -42,6 +42,7 @@ public class Battleship extends ListenerAdapter {
 
     Timer p1timer = new Timer();
     Timer p2timer = new Timer();
+    Timer timer;
 
     TimerTask terminate1 = new TimerTask(){
         @Override
@@ -176,6 +177,8 @@ public class Battleship extends ListenerAdapter {
                 privateChannel.sendMessage("Deploy your ships!").queue();
                 privateChannel.sendMessage("Format example: `f3-f5` or `d3-g3`").queue();
             });
+            timer = new Timer();
+            timer.schedule(abort,300000);
         }
         else if(event.getReactionEmote().getName().equals("❎")&&event.getMember().getUser().equals(player2)&&reactable){
             reactable = false;
@@ -184,13 +187,11 @@ public class Battleship extends ListenerAdapter {
         }
     }
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent event){
-        if(event.getAuthor().isBot()){
+        if(event.getAuthor().isBot()||!event.getAuthor().equals(player1)&&!event.getAuthor().equals(player2)){
             return;
         }
         String message = event.getMessage().getContentRaw().toLowerCase();
         if(!gameActive){
-            Timer timer = new Timer();
-            timer.schedule(abort,500000);
             if(message.equals("/ff")){
                 player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Game aborted.").queue());
                 player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Game aborted.").queue());
@@ -309,17 +310,20 @@ public class Battleship extends ListenerAdapter {
             printMap(event.getAuthor(),true,event.getChannel());
             if(!((Arrays.toString(ships1)+Arrays.toString(ships2)).contains("1")||(Arrays.toString(ships1)+Arrays.toString(ships2)).contains("2"))){
                 gameActive = true;
+                timer.cancel();
                 turn.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("Your turn!").queue());
                 if(turn.equals(player1)){
-                    p1timer.schedule(p1timeout,200000);
+                    p1timer.schedule(p1timeout,120000);
                 }
                 else if(turn.equals(player2)){
-                    p2timer.schedule(p2timeout,200000);
+                    p2timer.schedule(p2timeout,120000);
                 }
             }
         }
         else { //gameActive = true
             if(message.equals("/ff")){
+                p1timer.cancel();
+                p2timer.cancel();
                 if(event.getAuthor().equals(player1)){
                     printMap(player1,true,player2.openPrivateChannel().complete());
                     printMap(player2,true,event.getChannel());
@@ -428,7 +432,7 @@ public class Battleship extends ListenerAdapter {
                 printMap(player2,true,player2.openPrivateChannel().complete());
                 p1timer.cancel();
                 turn = player2;
-                p2timer.schedule(p2timeout,200000);
+                p2timer.schedule(p2timeout,120000);
             }
             else if(turn.equals(player2)){
                 switch(map1[row-1][column-1]){
@@ -477,7 +481,7 @@ public class Battleship extends ListenerAdapter {
                 printMap(player1,true,player1.openPrivateChannel().complete());
                 p2timer.cancel();
                 turn = player1;
-                p1timer.schedule(p1timeout,200000);
+                p1timer.schedule(p1timeout,120000);
             }
             turn.openPrivateChannel().queue((privateChannel -> privateChannel.sendMessage("Your turn!").queue()));
         }
