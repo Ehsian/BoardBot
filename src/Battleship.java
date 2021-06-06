@@ -14,8 +14,9 @@ import java.util.TimerTask;
 TODO:
     - Timeout in game (prevent hostage holding) DONE
     - ff / resign (when need to leave or you know you will lose already) DONE
-    - "You sunk my battleship!"
-    - List which ships have not been placed yet (improve setup)
+    - "You sunk my battleship!" (Is it necessary? - Could potentially add more strategy and gameplay (E.g. Tricking people into thinking something is sunk))
+        - Implement Classic mode, other modes, probably later on in summer
+    - List which ships have not been placed yet (improve setup) DONE
     - Ranking/Rating
         - Leaderboard
     - Aborting game before game start (during setup) DONE
@@ -27,8 +28,7 @@ TODO:
 public class Battleship extends ListenerAdapter {
 
     boolean reactable;
-
-    GuildMessageReceivedEvent event;
+    GuildMessageReceivedEvent mainevent;
     String[]args;
     User player1;
     User player2;
@@ -50,7 +50,7 @@ public class Battleship extends ListenerAdapter {
             if(reactable){
                 Main.inGame.remove(player1);
                 reactable = false;
-                event.getChannel().sendMessage("Operation terminated. (Timeout)").queue();
+                mainevent.getChannel().sendMessage("Operation terminated. (Timeout)").queue();
             }
         }
     };
@@ -72,11 +72,11 @@ public class Battleship extends ListenerAdapter {
                 embed.setColor(0x00e5ff);
                 embed.setDescription("**"+player1.getName()+" loses to "+player2.getName()+"**");
                 embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You win! (Your opponent has timed out.)").queue());
                 player1 = null;
                 player2 = null;
-                event.getChannel().sendMessage(embed.build()).queue();
+                mainevent.getChannel().sendMessage(embed.build()).queue();
                 embed.clear();
-                player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You win! (Your opponent has timed out.)").queue());
             }
         }
     };
@@ -97,11 +97,11 @@ public class Battleship extends ListenerAdapter {
                 embed.setColor(0x00e5ff);
                 embed.setDescription("**"+player1.getName()+" wins against "+player2.getName()+"**");
                 embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You win! (Your opponent has timed out.)").queue());
                 player1 = null;
                 player2 = null;
-                event.getChannel().sendMessage(embed.build()).queue();
+                mainevent.getChannel().sendMessage(embed.build()).queue();
                 embed.clear();
-                player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You win! (Your opponent has timed out.)").queue());
             }
         }
     };
@@ -115,33 +115,33 @@ public class Battleship extends ListenerAdapter {
                 Main.inGame.remove(player2);
                 player1 = null;
                 player2 = null;
-                event.getChannel().sendMessage("Game aborted.").queue();
+                mainevent.getChannel().sendMessage("Game aborted.").queue();
             }
         }
     };
 
     public Battleship(String[]args, GuildMessageReceivedEvent event){
-        this.event = event;
+        mainevent = event;
         this.args = args;
         main();
     }
     public void main(){
-        player1 = event.getAuthor();
+        player1 = mainevent.getAuthor();
         if(Main.inGame.contains(player1)){
-            event.getChannel().sendMessage("Challenge failed. (Finish your current game first!)").queue();
+            mainevent.getChannel().sendMessage("Challenge failed. (Finish your current game first!)").queue();
             player1 = null;
             return;
         } else{
             Main.inGame.add(player1);
         }
         try{
-            player2 = event.getMessage().getMentionedUsers().get(0);
+            player2 = mainevent.getMessage().getMentionedUsers().get(0);
             if(player2.isBot()||player2.equals(player1)){
-                event.getChannel().sendMessage("Please challenge a valid user.").queue();
+                mainevent.getChannel().sendMessage("Please challenge a valid user.").queue();
                 Main.inGame.remove(player1);
                 player1 = null;
             } else{
-                event.getChannel().sendMessage(String.format("<@%s>, you have 10 seconds to respond to this challenge.",player2.getId())).queue(message -> {
+                mainevent.getChannel().sendMessage(String.format("<@%s>, you have 10 seconds to respond to this challenge.",player2.getId())).queue(message -> {
                     message.addReaction("✅").queue();
                     message.addReaction("❎").queue();
                     reactable = true;
@@ -151,7 +151,7 @@ public class Battleship extends ListenerAdapter {
             }
         }
         catch(Exception e){
-            event.getChannel().sendMessage("Please challenge a valid user.").queue();
+            mainevent.getChannel().sendMessage("Please challenge a valid user.").queue();
             Main.inGame.remove(player1);
         }
     }
@@ -171,11 +171,25 @@ public class Battleship extends ListenerAdapter {
                 printMap(player1,true,privateChannel);
                 privateChannel.sendMessage("Deploy your ships!").queue();
                 privateChannel.sendMessage("Format example: `f3-f5` or `d3-g3`").queue();
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("Remaining ships to deploy:");
+                embed.addField("Carrier (5)",""+ships1[3],true);
+                embed.addField("Battleship (4),",""+ships1[2],true);
+                embed.addField("Destroyer (3)",""+ships1[1],true);
+                embed.addField("Patrol Boat (2)",""+ships1[0],true);
+                privateChannel.sendMessage(embed.build()).queue();
             });
             player2.openPrivateChannel().queue(privateChannel -> {
                 printMap(player2,true,privateChannel);
                 privateChannel.sendMessage("Deploy your ships!").queue();
                 privateChannel.sendMessage("Format example: `f3-f5` or `d3-g3`").queue();
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("Remaining ships to deploy:");
+                embed.addField("Carrier (5)",""+ships2[3],true);
+                embed.addField("Battleship (4),",""+ships2[2],true);
+                embed.addField("Destroyer (3)",""+ships2[1],true);
+                embed.addField("Patrol Boat (2)",""+ships2[0],true);
+                privateChannel.sendMessage(embed.build()).queue();
             });
             timer = new Timer();
             timer.schedule(abort,300000);
@@ -199,7 +213,7 @@ public class Battleship extends ListenerAdapter {
                 Main.inGame.remove(player2);
                 player1 = null;
                 player2 = null;
-                this.event.getChannel().sendMessage("Game aborted.").queue();
+                mainevent.getChannel().sendMessage("Game aborted.").queue();
                 return;
             }
 
@@ -308,6 +322,7 @@ public class Battleship extends ListenerAdapter {
                 }
             }
             printMap(event.getAuthor(),true,event.getChannel());
+
             if(!((Arrays.toString(ships1)+Arrays.toString(ships2)).contains("1")||(Arrays.toString(ships1)+Arrays.toString(ships2)).contains("2"))){
                 gameActive = true;
                 timer.cancel();
@@ -318,6 +333,24 @@ public class Battleship extends ListenerAdapter {
                 else if(turn.equals(player2)){
                     p2timer.schedule(p2timeout,120000);
                 }
+            }
+            else if(event.getAuthor().equals(player1)){
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("Remaining ships to deploy:");
+                embed.addField("Carrier (5)",""+ships1[3],true);
+                embed.addField("Battleship (4),",""+ships1[2],true);
+                embed.addField("Destroyer (3)",""+ships1[1],true);
+                embed.addField("Patrol Boat (2)",""+ships1[0],true);
+                event.getChannel().sendMessage(embed.build()).queue();
+            }
+            else if(event.getAuthor().equals(player2)){
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("Remaining ships to deploy:");
+                embed.addField("Carrier (5)",""+ships2[3],true);
+                embed.addField("Battleship (4),",""+ships2[2],true);
+                embed.addField("Destroyer (3)",""+ships2[1],true);
+                embed.addField("Patrol Boat (2)",""+ships2[0],true);
+                event.getChannel().sendMessage(embed.build()).queue();
             }
         }
         else { //gameActive = true
@@ -340,7 +373,7 @@ public class Battleship extends ListenerAdapter {
                     embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
                     player1 = null;
                     player2 = null;
-                    this.event.getChannel().sendMessage(embed.build()).queue();
+                    mainevent.getChannel().sendMessage(embed.build()).queue();
                     embed.clear();
                 }else{ //player2
                     printMap(player2,true,player1.openPrivateChannel().complete());
@@ -358,7 +391,7 @@ public class Battleship extends ListenerAdapter {
                     embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
                     player1 = null;
                     player2 = null;
-                    this.event.getChannel().sendMessage(embed.build()).queue();
+                    mainevent.getChannel().sendMessage(embed.build()).queue();
                     embed.clear();
                 }
                 return;
@@ -417,7 +450,7 @@ public class Battleship extends ListenerAdapter {
                             embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
                             player1 = null;
                             player2 = null;
-                            this.event.getChannel().sendMessage(embed.build()).queue();
+                            event.getChannel().sendMessage(embed.build()).queue();
                             embed.clear();
                             return;
                         }
@@ -432,6 +465,32 @@ public class Battleship extends ListenerAdapter {
                 printMap(player2,true,player2.openPrivateChannel().complete());
                 p1timer.cancel();
                 turn = player2;
+                p2timeout = new TimerTask() {
+                    @Override
+                    public void run() {
+                        if(gameActive){
+                            player2.openPrivateChannel().queue(privateChannel -> {
+                                privateChannel.sendMessage("You spent too long before your next move. (Timeout)").queue();
+                                privateChannel.sendMessage("You have been given a loss for your inactivity.").queue();
+                            });
+                            Main.inGame.remove(player1);
+                            Main.inGame.remove(player2);
+                            Tools.getPlayer(player1).winBatShip(player2);
+                            Tools.getPlayer(player2).loseBatShip();
+                            EmbedBuilder embed = new EmbedBuilder();
+                            embed.setTitle("Results");
+                            embed.setColor(0x00e5ff);
+                            embed.setDescription("**"+player1.getName()+" wins against "+player2.getName()+"**");
+                            embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                            player1.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You win! (Your opponent has timed out.)").queue());
+                            player1 = null;
+                            player2 = null;
+                            mainevent.getChannel().sendMessage(embed.build()).queue();
+                            embed.clear();
+                        }
+                    }
+                };
+                p2timer = new Timer();
                 p2timer.schedule(p2timeout,120000);
             }
             else if(turn.equals(player2)){
@@ -466,7 +525,7 @@ public class Battleship extends ListenerAdapter {
                             embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
                             player1 = null;
                             player2 = null;
-                            this.event.getChannel().sendMessage(embed.build()).queue();
+                            mainevent.getChannel().sendMessage(embed.build()).queue();
                             embed.clear();
                             return;
                         }
@@ -481,6 +540,32 @@ public class Battleship extends ListenerAdapter {
                 printMap(player1,true,player1.openPrivateChannel().complete());
                 p2timer.cancel();
                 turn = player1;
+                p1timeout = new TimerTask() {
+                    @Override
+                    public void run() {
+                        if(gameActive){
+                            player1.openPrivateChannel().queue(privateChannel -> {
+                                privateChannel.sendMessage("You spent too long before your next move. (Timeout)").queue();
+                                privateChannel.sendMessage("You have been given a loss for your inactivity.").queue();
+                            });
+                            Main.inGame.remove(player1);
+                            Main.inGame.remove(player2);
+                            Tools.getPlayer(player2).winBatShip(player1);
+                            Tools.getPlayer(player1).loseBatShip();
+                            EmbedBuilder embed = new EmbedBuilder();
+                            embed.setTitle("Results");
+                            embed.setColor(0x00e5ff);
+                            embed.setDescription("**"+player1.getName()+" loses to "+player2.getName()+"**");
+                            embed.addField("**"+player1.getName()+"** vs **"+player2.getName()+"**",Tools.getPlayer(player1).getBatShip1v1Stats(player2)+" - "+Tools.getPlayer(player2).getBatShip1v1Stats(player1),false);
+                            player2.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("You win! (Your opponent has timed out.)").queue());
+                            player1 = null;
+                            player2 = null;
+                            mainevent.getChannel().sendMessage(embed.build()).queue();
+                            embed.clear();
+                        }
+                    }
+                };
+                p1timer = new Timer();
                 p1timer.schedule(p1timeout,120000);
             }
             turn.openPrivateChannel().queue((privateChannel -> privateChannel.sendMessage("Your turn!").queue()));

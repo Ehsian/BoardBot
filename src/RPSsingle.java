@@ -46,7 +46,7 @@ public class RPSsingle extends ListenerAdapter {
         } else {
             Main.inGame.add(player1);
         }
-        event.getChannel().sendMessage("Commencing game... (Check your DMs)");
+        event.getChannel().sendMessage("Commencing game... (Check your DMs)").queue();
         player1.openPrivateChannel().queue((privateChannel -> {
             privateChannel.sendMessage("React your selection!").queue(message -> {
                 message.addReaction("\uD83E\uDEA8").queue();

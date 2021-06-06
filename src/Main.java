@@ -52,7 +52,7 @@ public class Main extends ListenerAdapter {
                         allPlayers.add(new Player(event.getMessage().getMentionedUsers().get(0).getId()));
                     }
                 }
-                catch(Exception e){}
+                catch(Exception ignored){}
             }
             switch (args[0].substring(Main.prefix.length()).toLowerCase()) {
                 case "help", "info", "commands" -> Help.main(args, event);
