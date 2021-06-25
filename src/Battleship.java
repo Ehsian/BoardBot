@@ -576,33 +576,33 @@ public class Battleship extends ListenerAdapter {
         if(player.equals(player1)){
             board = map1;
         }
-        String mapAsString = ":blue_square::one::two::three::four::five::six::seven::eight::nine::keycap_ten:";
+        StringBuilder mapAsString = new StringBuilder(":blue_square::one::two::three::four::five::six::seven::eight::nine::keycap_ten:");
         for(int i=0;i<10;i++){
-            mapAsString+="\n:regional_indicator_"+(char)(i+97)+":";
+            mapAsString.append("\n:regional_indicator_").append((char) (i + 97)).append(":");
             for(int j=0;j<10;j++){
                 if(board[i][j]==0){
-                    mapAsString+=":blue_square:";
+                    mapAsString.append(":blue_square:");
                 }
                 else if(board[i][j]==1&&seeShipLocations){
-                    mapAsString+=":black_large_square:";
+                    mapAsString.append(":black_large_square:");
                 }
                 else if(board[i][j]==1&&!seeShipLocations){
-                    mapAsString+=":blue_square:";
+                    mapAsString.append(":blue_square:");
                 }
                 else if(board[i][j]==2){
-                    mapAsString+=":white_circle:";
+                    mapAsString.append(":white_circle:");
                 }
                 else if(board[i][j]==3&&seeShipLocations){
-                    mapAsString+=":x:";
+                    mapAsString.append(":x:");
                 }
                 else if(board[i][j]==3&&!seeShipLocations){
-                    mapAsString+=":red_square:";
+                    mapAsString.append(":red_square:");
                 }
             }
         }
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(player.getName()+"'s Board:");
-        embed.setDescription(mapAsString);
+        embed.setDescription(mapAsString.toString());
         channel.sendMessage(embed.build()).queue();
     }
 }
