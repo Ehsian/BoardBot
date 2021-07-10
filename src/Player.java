@@ -1,5 +1,6 @@
 import net.dv8tion.jda.api.entities.User;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -37,6 +38,9 @@ public class Player implements Serializable {
         this.totalrpslosses = totalrpslosses;
         this.rpswins = rpswins;
     }
+    public void Save() throws IOException{
+        SaveData.saveData(Tools.getPlayer(User.fromId(userID)));
+    }
 
     //-------------------------------------------RockPaperScissors
     public void winRps(User opponent){
@@ -52,12 +56,20 @@ public class Player implements Serializable {
             rpswins.set(Main.allUsers.indexOf(opponent),rpswins.get(Main.allUsers.indexOf(opponent))+1);
         }
         totalgamesplayed++;
+        try{
+            Save();
+        }
+        catch (Exception ignored){}
     }
     public void loseRps(){
         totalrpslosses++;
         rpswinstreak=0;
         rpsgamesplayed++;
         totalgamesplayed++;
+        try{
+            Save();
+        }
+        catch (Exception ignored){}
     }
     public int getRps1v1Stats(User opponent){
         try{
@@ -84,12 +96,20 @@ public class Player implements Serializable {
             batshipwins.set(Main.allUsers.indexOf(opponent),batshipwins.get(Main.allUsers.indexOf(opponent))+1);
         }
         totalgamesplayed++;
+        try{
+            Save();
+        }
+        catch (Exception ignored){}
     }
     public void loseBatShip(){
         totalbatshiplosses++;
         batshipwinstreak=0;
         batshipgamesplayed++;
         totalgamesplayed++;
+        try{
+            Save();
+        }
+        catch (Exception ignored){}
     }
     public int getBatShip1v1Stats(User opponent){
         try{

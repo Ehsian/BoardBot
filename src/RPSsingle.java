@@ -93,6 +93,11 @@ public class RPSsingle extends ListenerAdapter {
                 embed.setDescription("**" + player1.getName() + " draws against " + player2.getName() + "**");
                 Tools.getPlayer(player1).totalgamesplayed++;
                 Tools.getPlayer(player2).totalgamesplayed++;
+                try{
+                    Tools.getPlayer(player1).Save();
+                    Tools.getPlayer(player2).Save();
+                }
+                catch (Exception ignored){}
             } else {
                 player1.openPrivateChannel().queue((dm -> dm.sendMessage("You win!").queue()));
                 embed.setDescription("**" + player1.getName() + " wins against " + player2.getName() + "**");

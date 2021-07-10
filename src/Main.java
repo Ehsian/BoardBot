@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -20,11 +21,14 @@ public class Main extends ListenerAdapter {
     public static ArrayList<User> allUsers = new ArrayList<>();
     public static ArrayList<Player> allPlayers = new ArrayList<>();
 
-    public static void main(String[] args) throws LoginException,IOException {
+    public static void main(String[] args) throws LoginException,IOException,ClassNotFoundException {
         //-------------------------------------------------- Initialize Bot
         BufferedReader br = new BufferedReader(new FileReader("ignore/token.txt"));
         jda = JDABuilder.createDefault(br.readLine()).build();
         br.close();
+
+        SaveData.loadData();
+
         if(!allUsers.contains(jda.getSelfUser())){
             allUsers.add(jda.getSelfUser());
             allPlayers.add(new Player(jda.getSelfUser().getId()));
@@ -66,27 +70,16 @@ public class Main extends ListenerAdapter {
                     }
                 }
                 case "battleship" -> jda.addEventListener(new Battleship(args,event));
-                case "test" -> {
+                case "save" -> {
                     try {
                         SaveData.saveData();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-                case "test2" -> {
-                    try {
-                        SaveData.loadData();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                case "test3" -> System.out.println(Tools.getPlayer(event.getAuthor()).totalgamesplayed);
+                case "test" -> System.out.println(Tools.getPlayer(event.getAuthor()).totalgamesplayed);
                 case "mumen","rider","mumenrider","ki" -> jda.addEventListener(new MumenRider(event));
             }
         }
-    }
-    @Override
-    public void onMessageReceived(MessageReceivedEvent event){
-
     }
 }
