@@ -70,6 +70,7 @@ public class Main extends ListenerAdapter {
                     }
                 }
                 case "battleship" -> jda.addEventListener(new Battleship(args,event));
+                case "leaderboard" -> jda.addEventListener(new Leaderboard(args,event));
                 case "save" -> {
                     try {
                         SaveData.saveData();

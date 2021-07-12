@@ -9,7 +9,8 @@ public class Help extends ListenerAdapter{
     static String help1 = "`help` - You're already here!\n" +
             "`ping` - Finds latency of the bot.\n" +
             "`rps <user>` - Challenges a user to a duel of rock paper scissors. Omit <user> to challenge the bot.\n" +
-            "`battleship <user>` - Challenges a user to a duel of Battleship.";
+            "`battleship <user>` - Challenges a user to a duel of Battleship.\n" +
+            "`leaderboard <category>` - Displays the top users of the event specified. Omit <category> to see all categories.";
     public static void main(String[] args, GuildMessageReceivedEvent event) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Help");
